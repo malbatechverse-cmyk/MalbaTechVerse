@@ -476,7 +476,7 @@ img { max-width: 100%; display: block; }
 }
 
 .install-modal .install-actions { display: flex; flex-direction: column; gap: 10px; }
-.install-overlay.ios .install-steps { display: flex; }
+.install-overlay.ios .ios-steps { display: flex; }
 .install-overlay.ios .btn-confirm { display: none; }
 
 .install-modal .dismiss-link {
