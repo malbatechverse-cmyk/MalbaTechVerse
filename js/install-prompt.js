@@ -17,7 +17,7 @@
 (function () {
   const STORAGE_KEY = "techverse_install_dismissed_at";
   const DISMISS_DAYS = 1; // depois de fechar, só pergunta de novo no dia seguinte
-  const WAIT_FOR_NATIVE_PROMPT_MS = 600;
+  const WAIT_FOR_NATIVE_PROMPT_MS = 3000;
 
   function isStandalone() {
     return (
@@ -139,11 +139,10 @@
       return;
     }
 
-    // Android/Chrome/Edge: guarda o evento e abre a caixa NATIVA do Chrome
-    // direto no primeiro toque da pessoa na tela — sem passar pelo nosso
-    // popup. O Chrome exige esse toque; não deixa o site abrir sozinho.
-    window.addEventListener("beforeinstallprompt", (event) => {
-      event.preventDefault();
+    // Android/Chrome/Edge: abre a caixa NATIVA do Chrome direto no primeiro
+    // toque da pessoa na tela — sem passar pelo nosso popup. O Chrome exige
+    // esse toque; não deixa o site abrir a caixa sozinho.
+    function registrarNativo(event) {
       deferredPrompt = event;
       nativoDisponivel = true;
 
@@ -161,6 +160,17 @@
 
       // { once: true } = dispara só no primeiro toque e se remove sozinho.
       document.addEventListener("pointerdown", dispararNativo, { once: true });
+    }
+
+    // Caso 1: o evento já foi capturado pelo script no <head>, antes deste
+    // arquivo (que tem defer) rodar.
+    if (window.__bipEvent) {
+      registrarNativo(window.__bipEvent);
+    }
+
+    // Caso 2: o evento chega depois — o script do <head> avisa por "bip-ready".
+    window.addEventListener("bip-ready", () => {
+      if (window.__bipEvent) registrarNativo(window.__bipEvent);
     });
 
     // Se o Chrome não liberar a instalação (evento nunca chega), mostramos
