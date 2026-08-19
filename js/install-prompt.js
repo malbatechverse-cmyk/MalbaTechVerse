@@ -14,8 +14,8 @@
 
 (function () {
   const STORAGE_KEY = "techverse_install_dismissed_at";
-  const DISMISS_DAYS = 7; // depois de fechar, só pergunta de novo em 7 dias
-  const WAIT_FOR_NATIVE_PROMPT_MS = 2000;
+  const DISMISS_DAYS = 1; // depois de fechar, só pergunta de novo no dia seguinte
+  const WAIT_FOR_NATIVE_PROMPT_MS = 600;
 
   function isStandalone() {
     return (
@@ -44,7 +44,7 @@
     overlay.className = "install-overlay";
     overlay.innerHTML = `
       <div class="install-modal" role="dialog" aria-modal="true" aria-label="Instalar Malba TechVerse">
-        <img class="install-icon" src="icons/icon-192.png" alt="Ícone Malba TechVerse" />
+        <img class="install-icon" src="icons/icon-popup.png" alt="Ícone Malba TechVerse" />
         <h2>Instalar Malba TechVerse</h2>
         <p class="android-copy">Adicione à tela inicial do seu celular para abrir o app rapidinho durante a feira, sem precisar do navegador.</p>
 
@@ -113,6 +113,11 @@
     window.addEventListener("beforeinstallprompt", (event) => {
       event.preventDefault();
       deferredPrompt = event;
+      // Se o popup já tinha caído no modo manual (evento chegou atrasado),
+      // volta para o modo nativo, que é bem mais fácil pro usuário.
+      androidSteps.style.display = "none";
+      confirmBtn.textContent = "Instalar agora";
+      overlay.classList.remove("manual-fallback");
       show();
     });
 
