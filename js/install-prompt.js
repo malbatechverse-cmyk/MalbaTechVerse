@@ -1,14 +1,16 @@
 /**
- * Malba TechVerse — Popup "Instalar app"
- * ---------------------------------------
- * Android/Chrome: escuta `beforeinstallprompt` e, se ele disparar a tempo,
- *   mostra o popup com botão "Instalar" que aciona o prompt nativo.
- * IMPORTANTE: como o site é multi-página (cada troca de tela recarrega o
- *   JS do zero), esse evento é instável — o Chrome não garante disparar
- *   ele de novo em toda navegação. Por isso, se ele não chegar em ~2s,
- *   mostramos o popup mesmo assim com instrução manual (menu do navegador
- *   > "Instalar app" / "Adicionar à tela inicial"), do mesmo jeito que já
- *   fazemos no iOS (que nunca tem esse evento).
+ * Malba TechVerse — Instalação do app
+ * ------------------------------------
+ * Android/Chrome: NÃO usa popup próprio. Guarda o evento
+ *   `beforeinstallprompt` e abre a caixa NATIVA do Chrome ("Instalar app")
+ *   já no primeiro toque da pessoa em qualquer lugar da tela.
+ *   O Chrome obriga que esse toque exista — um site não pode abrir essa
+ *   caixa sozinho, é uma trava de segurança do próprio navegador.
+ * iOS/Safari: a Apple não oferece esse evento nem essa caixa, então aí
+ *   mostramos nosso popup com o passo a passo manual
+ *   (Compartilhar > Adicionar à Tela de Início).
+ * Chrome sem instalação disponível: mostramos nosso popup explicando como
+ *   instalar pelo menu ⋮ do navegador.
  * Já instalado (modo standalone): não mostra nada.
  */
 
@@ -73,78 +75,105 @@
     if (isStandalone() || wasRecentlyDismissed()) return;
 
     let deferredPrompt = null;
+    let nativoDisponivel = false;
     let shown = false;
-    const overlay = buildModal();
-    const dismissBtn = overlay.querySelector(".dismiss-link");
-    const confirmBtn = overlay.querySelector(".btn-confirm");
-    const androidSteps = overlay.querySelector(".android-steps");
+    let overlay = null;
+    let dismissBtn = null;
+    let confirmBtn = null;
+    let androidSteps = null;
+
+    function garantirModal() {
+      if (overlay) return;
+      overlay = buildModal();
+      dismissBtn = overlay.querySelector(".dismiss-link");
+      confirmBtn = overlay.querySelector(".btn-confirm");
+      androidSteps = overlay.querySelector(".android-steps");
+
+      dismissBtn.addEventListener("click", () => {
+        markDismissed();
+        close();
+      });
+
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) {
+          markDismissed();
+          close();
+        }
+      });
+
+      confirmBtn.addEventListener("click", async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          deferredPrompt = null;
+          if (outcome !== "accepted") markDismissed();
+          close();
+          return;
+        }
+        close();
+      });
+    }
 
     function show() {
       if (shown) return;
       shown = true;
+      garantirModal();
       requestAnimationFrame(() => overlay.classList.add("visible"));
     }
 
     function close() {
+      if (!overlay) return;
       overlay.classList.remove("visible");
-      setTimeout(() => overlay.remove(), 350);
+      const ref = overlay;
+      setTimeout(() => ref.remove(), 350);
+      overlay = null;
+      shown = false;
     }
 
-    dismissBtn.addEventListener("click", () => {
-      markDismissed();
-      close();
-    });
-
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) {
-        markDismissed();
-        close();
-      }
-    });
-
     if (isIOS()) {
-      // Sem beforeinstallprompt no iOS: mostra o popup com instrução manual direto.
+      // Sem beforeinstallprompt no iOS: só resta o passo a passo manual.
+      garantirModal();
       overlay.classList.add("ios");
-      show();
+      shown = true;
+      requestAnimationFrame(() => overlay.classList.add("visible"));
       return;
     }
 
-    // Android/Chrome/Edge: se o navegador liberar o prompt nativo, usamos ele.
+    // Android/Chrome/Edge: guarda o evento e abre a caixa NATIVA do Chrome
+    // direto no primeiro toque da pessoa na tela — sem passar pelo nosso
+    // popup. O Chrome exige esse toque; não deixa o site abrir sozinho.
     window.addEventListener("beforeinstallprompt", (event) => {
       event.preventDefault();
       deferredPrompt = event;
-      // Se o popup já tinha caído no modo manual (evento chegou atrasado),
-      // volta para o modo nativo, que é bem mais fácil pro usuário.
-      androidSteps.style.display = "none";
-      confirmBtn.textContent = "Instalar agora";
-      overlay.classList.remove("manual-fallback");
-      show();
-    });
+      nativoDisponivel = true;
 
-    // Se o evento nativo não chegar a tempo (comum navegando entre páginas),
-    // mostra o popup mesmo assim com instrução manual de menu.
-    setTimeout(() => {
-      if (!shown && !deferredPrompt) {
-        androidSteps.style.display = "flex";
-        confirmBtn.textContent = "Entendi";
-        overlay.classList.add("manual-fallback");
-      }
-      show();
-    }, WAIT_FOR_NATIVE_PROMPT_MS);
+      // Se o popup manual já estava na tela, tira ele: agora temos o nativo.
+      if (shown) close();
 
-    confirmBtn.addEventListener("click", async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
+      const dispararNativo = async () => {
+        if (!deferredPrompt) return;
+        const prompt = deferredPrompt;
         deferredPrompt = null;
+        prompt.prompt();
+        const { outcome } = await prompt.userChoice;
         if (outcome !== "accepted") markDismissed();
-        close();
-        return;
-      }
-      // Sem prompt nativo disponível: já estamos mostrando as instruções
-      // manuais no corpo do popup, então só confirma e fecha.
-      close();
+      };
+
+      // { once: true } = dispara só no primeiro toque e se remove sozinho.
+      document.addEventListener("pointerdown", dispararNativo, { once: true });
     });
+
+    // Se o Chrome não liberar a instalação (evento nunca chega), mostramos
+    // nosso popup com o passo a passo pelo menu do navegador.
+    setTimeout(() => {
+      if (nativoDisponivel || shown) return;
+      garantirModal();
+      androidSteps.style.display = "flex";
+      confirmBtn.textContent = "Entendi";
+      overlay.classList.add("manual-fallback");
+      shown = true;
+      requestAnimationFrame(() => overlay.classList.add("visible"));
+    }, WAIT_FOR_NATIVE_PROMPT_MS);
 
     window.addEventListener("appinstalled", close);
   }
