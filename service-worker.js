@@ -1,7 +1,7 @@
 // Malba TechVerse — Service Worker
 // Responsável por deixar o site "instalável" (PWA) e funcionar offline básico.
 
-const CACHE_NAME = "malba-techverse-v2";
+const CACHE_NAME = "malba-techverse-v3";
 const CORE_ASSETS = [
   "index.html",
   "mapa.html",
@@ -11,7 +11,8 @@ const CORE_ASSETS = [
   "js/install-prompt.js",
   "manifest.json",
   "icons/icon-192.png",
-  "icons/icon-512.png"
+  "icons/icon-512.png",
+  "icons/icon-popup.png"
 ];
 
 self.addEventListener("install", (event) => {
