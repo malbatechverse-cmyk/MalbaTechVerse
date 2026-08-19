@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>Entrar com telefone · Malba TechVerse</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="img/favicon.png" />
+  <meta name="theme-color" content="#241c5e" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/fonts-ready.js"></script>
+  <style>
+    .phone-screen {
+      justify-content: center;
+      gap: 22px;
+      text-align: center;
+      padding-top: calc(40px + var(--safe-top));
+    }
+    .back-link {
+      align-self: flex-start;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .field {
+      text-align: left;
+    }
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 8px;
+    }
+    .field input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-line);
+      background: rgba(255,255,255,0.08);
+      color: var(--color-white);
+      font-size: 16px;
+      font-family: var(--font-body);
+    }
+    .field input::placeholder { color: rgba(255,255,255,0.4); }
+    .field input:focus { outline: 2px solid var(--color-accent-cyan); border-color: transparent; }
+
+    .code-inputs {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .code-inputs {
+      gap: clamp(6px, 2vw, 10px);
+    }
+    .code-inputs input {
+      width: clamp(38px, 9vw, 46px);
+      height: clamp(48px, 12vw, 56px);
+      text-align: center;
+      font-size: clamp(18px, 5vw, 24px);
+      font-family: var(--font-mono);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-line);
+      background: rgba(255,255,255,0.08);
+      color: var(--color-white);
+    }
+    /* font-size >=16px no input de número evita zoom automático no iOS Safari */
+    .field input { font-size: 16px; }
+    .code-inputs input:focus { outline: 2px solid var(--color-accent-cyan); border-color: transparent; }
+
+    .step { display: none; flex-direction: column; gap: 22px; }
+    .step.active { display: flex; }
+
+    .hint { font-size: 13px; color: var(--color-muted); }
+    .error-msg {
+      font-size: 13px;
+      color: #ff8484;
+      font-weight: 600;
+      min-height: 18px;
+    }
+    #recaptcha-container { display: flex; justify-content: center; }
+  </style>
+</head>
+<body>
+  <div class="app-shell" style="padding-bottom:0;">
+    <div class="screen phone-screen">
+
+      <a href="index.html" class="back-link">← Voltar</a>
+      <h1 style="font-size:30px;">Entrar com telefone</h1>
+
+      <!-- ETAPA 1: número -->
+      <div class="step active" id="step-phone">
+        <div class="field">
+          <label for="numero">Número de celular</label>
+          <input type="tel" id="numero" placeholder="(44) 99999-9999" inputmode="numeric" />
+        </div>
+        <p class="hint">Vamos enviar um código de verificação por SMS.</p>
+        <p class="error-msg" id="erro-numero"></p>
+        <div id="recaptcha-container"></div>
+        <button class="btn btn-google" id="enviar-codigo">Enviar código</button>
+      </div>
+
+      <!-- ETAPA 2: código SMS -->
+      <div class="step" id="step-codigo">
+        <div>
+          <label style="display:block; font-size:13px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--color-muted); margin-bottom:14px;">
+            Digite o código recebido
+          </label>
+          <div class="code-inputs">
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+            <input maxlength="1" inputmode="numeric" />
+          </div>
+        </div>
+        <p class="error-msg" id="erro-codigo"></p>
+        <button class="btn btn-google" id="confirmar-codigo">Confirmar</button>
+        <button class="btn-ghost" id="reenviar-codigo" style="background:none; align-self:center;">Reenviar código</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth-telefone.js"></script>
+  <script src="js/install-prompt.js"></script>
+</body>
+</html>

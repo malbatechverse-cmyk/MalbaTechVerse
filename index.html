@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>Malba TechVerse</title>
+  <meta name="description" content="Gincana tecnológica da Feira de Ciências do Colégio Malba Tahan" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="img/favicon.png" />
+  <meta name="theme-color" content="#241c5e" />
+  <link rel="apple-touch-icon" href="img/favicon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TechVerse" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/fonts-ready.js"></script>
+
+  <style>
+    .login-screen { padding: 0; }
+    .brand-block {
+      background: radial-gradient(circle at 50% 30%, #4536a8 0%, #241c5e 55%, #181433 100%);
+      padding-top: var(--safe-top);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      line-height: 0;
+      max-height: clamp(160px, 34vh, 260px);
+      display: flex;
+      justify-content: center;
+    }
+    .brand-block img {
+      width: auto;
+      height: 100%;
+      max-height: clamp(160px, 34vh, 260px);
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 6px 18px rgba(0,0,0,0.5));
+      padding: 10px 0;
+    }
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 9vw, 44px);
+      color: var(--color-white);
+      -webkit-text-stroke: 1.5px var(--color-ink);
+      transform: rotate(-4deg);
+      display: inline-block;
+      margin-bottom: 18px;
+      letter-spacing: 0.02em;
+      max-width: 100%;
+    }
+    .shield {
+      width: clamp(130px, 40vw, 170px);
+      margin: 0 auto;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));
+    }
+    .login-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      padding: 40px 28px calc(48px + var(--safe-bottom));
+      text-align: center;
+      position: relative;
+    }
+    .login-body h1 { font-size: clamp(26px, 8vw, 34px); }
+    .login-body .subtitle {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--color-muted);
+      text-transform: uppercase;
+    }
+    .footer-note {
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      padding-bottom: 8px;
+      color: var(--color-muted);
+      line-height: 1.6;
+    }
+    .footer-note a {
+      color: var(--color-accent-amber);
+      font-weight: 700;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(245, 166, 35, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell" style="padding-bottom: 0;">
+    <div class="screen login-screen" style="padding:0;">
+
+      <header class="brand-block">
+        <img src="img/malba.png" alt="Malba TechVerse" />
+      </header>
+
+      <main class="login-body">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <h1 style="line-height:1;">Crie seu perfil</h1>
+          <p class="subtitle">com email @escola</p>
+        </div>
+
+        <button id="google-signin" class="btn btn-google">
+          <svg width="20" height="20" viewBox="0 0 48 48">
+            <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.7-.4-4z"/>
+            <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 16 3 9 7.5 6.3 14.7z"/>
+            <path fill="#4CAF50" d="M24 45c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.4C29.6 36 26.9 37 24 37c-5.3 0-9.6-3.1-11.3-7.6l-6.6 5C9 40.4 16 45 24 45z"/>
+            <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.5l6.6 5.4C41.4 35.8 45 30.4 45 24c0-1.4-.1-2.7-.4-3.5z"/>
+          </svg>
+          Sign in with Google
+        </button>
+
+        <p class="footer-note">
+          Caso não tenha @escola entre com<br />
+          <a href="login-telefone.html">número de telefone</a>
+        </p>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/install-prompt.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js").catch(console.error);
+      });
+    }
+  </script>
+</body>
+</html>

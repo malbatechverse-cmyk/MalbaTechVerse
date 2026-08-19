@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>Perfil · Malba TechVerse</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="img/favicon.png" />
+  <meta name="theme-color" content="#241c5e" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/fonts-ready.js"></script>
+  <style>
+    .profile-screen { align-items: center; text-align: center; padding-top: calc(24px + var(--safe-top)); }
+    .avatar-ring {
+      width: clamp(112px, 34vw, 142px); height: clamp(112px, 34vw, 142px);
+      border-radius: 50%;
+      padding: 4px;
+      background: conic-gradient(from 180deg, var(--color-accent-amber), var(--color-accent-cyan), var(--color-accent-amber));
+      margin: 22px 0 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+    .avatar {
+      width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
+      background: var(--color-bg-indigo);
+      border: 3px solid var(--color-bg-deep);
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    #nome-usuario { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.03em; font-weight: 400; }
+    .progress-block { width: 100%; margin-top: 26px; text-align: left; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .progress-label span:last-child { font-family: var(--font-mono); color: var(--color-accent-cyan); }
+    #qrcode-canvas { max-width: 100%; height: auto; }
+    .qr-frame {
+      position: relative; margin-top: 30px; padding: 20px;
+      background: #fff; border-radius: var(--radius-lg);
+    }
+    .qr-frame::before, .qr-frame::after,
+    .qr-frame .corner-l, .qr-frame .corner-r {
+      content: ""; position: absolute; width: 22px; height: 22px;
+      border: 3px solid var(--color-accent-cyan);
+    }
+    .qr-frame::before { top: -8px; left: -8px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+    .qr-frame::after { top: -8px; right: -8px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
+    .qr-frame .corner-l { bottom: -8px; left: -8px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
+    .qr-frame .corner-r { bottom: -8px; right: -8px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+    .qr-caption { font-family: var(--font-mono); font-size: 11px; color: var(--color-muted); margin-top: 12px; letter-spacing: 0.04em; }
+    .logout-btn { margin-top: 28px; font-size: 13px; color: var(--color-muted); text-decoration: underline; background: none; }
+    .premios-ganhos { width: 100%; margin-top: 8px; text-align: left; }
+    .premios-vazio-msg { font-size: 13px; color: var(--color-muted); }
+    #lista-premios-ganhos { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+    #lista-premios-ganhos li {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    #lista-premios-ganhos li::before { content: "🎁 "; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="screen profile-screen">
+      <h1>Perfil</h1>
+
+      <div class="avatar-ring">
+        <div class="avatar">
+          <img id="foto-usuario" src="icons/avatar-placeholder.png" alt="Foto de perfil" />
+        </div>
+      </div>
+      <div id="nome-usuario">Nome:</div>
+      <div class="medal-badge" style="margin-top:10px;">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.2 21 12 17.77 5.8 21 7 14.14l-5-4.87 7.1-1.01L12 2z"/></svg>
+        <span id="pontos-usuario">0</span> pontos
+      </div>
+      <a href="premios.html" class="btn btn-google" style="text-decoration:none; margin-top:18px; max-width:220px;">Ver prêmios</a>
+
+      <div class="progress-block">
+        <div class="progress-label"><span>Barracas visitadas</span><span id="barracas-count">0/25</span></div>
+        <div class="progress-track"><div class="progress-fill" id="barracas-fill" style="width:0%"></div></div>
+      </div>
+
+      <div class="qr-frame">
+        <div class="corner-l"></div><div class="corner-r"></div>
+        <canvas id="qrcode-canvas"></canvas>
+      </div>
+      <p class="qr-caption">SEU CÓDIGO PESSOAL · MOSTRE PARA RESGATAR</p>
+
+      <div class="premios-ganhos">
+        <h2 class="section-title" style="font-size:18px; margin:30px 0 10px;">Meus prêmios</h2>
+        <p id="premios-vazio" class="premios-vazio-msg">Troque pontos por prêmios na barraca de resgate.</p>
+        <ul id="lista-premios-ganhos"></ul>
+      </div>
+
+      <button class="logout-btn" id="logout">Sair da conta</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script>exigirLogin();</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <script src="js/barracas-config.js"></script>
+  <script src="js/perfil.js"></script>
+
+  <script src="js/nav.js"></script>
+  <script src="js/install-prompt.js"></script>
+</body>
+</html>

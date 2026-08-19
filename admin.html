@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Admin · Malba TechVerse</title>
+<link rel="icon" type="image/png" href="img/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+  <script src="js/fonts-ready.js"></script>
+<style>
+  .tabs { display:flex; gap:8px; margin:16px 0; }
+  .tab-btn { flex:1; min-height:44px; padding:10px; border-radius:999px; background:rgba(255,255,255,.08); color:#fff; font-weight:700; font-size: clamp(13px, 3.6vw, 15px); transition: transform .1s ease; }
+  .tab-btn:active { transform: scale(0.96); }
+  .tab-btn.active { background:var(--color-accent-amber); color:var(--color-ink); }
+  .panel { display:none; } .panel.active { display:block; }
+  .field { margin-bottom:12px; text-align:left; }
+  .field label { display:block; font-size:12px; font-weight:700; color:var(--color-muted); margin-bottom:6px; text-transform:uppercase; }
+  .field input { width:100%; min-height:44px; padding:12px; border-radius:var(--radius-md); border:1px solid var(--color-line); background:rgba(255,255,255,.08); color:#fff; font-size:16px; }
+  .prem-item { display:flex; gap:10px; align-items:center; background:rgba(255,255,255,.06); border-radius:var(--radius-md); padding:10px; margin-bottom:10px; flex-wrap: wrap; }
+  .prem-item img { width:50px; height:50px; border-radius:8px; object-fit:cover; background:#fff; flex-shrink:0; }
+  .prem-item .info { flex:1; font-size:13px; min-width: 120px; }
+  .prem-item button { background:var(--color-bg-violet); color:#fff; border-radius:999px; padding:8px 14px; min-height:38px; font-size:12px; font-weight:700; white-space: nowrap; transition: transform .1s ease; }
+  .prem-item button:active { transform: scale(0.94); }
+  #reader { width:100%; margin-top:10px; }
+  #reader video { border-radius: var(--radius-md); }
+  #resgate-user { font-weight:700; margin-top:10px; min-height:20px; word-break: break-word; }
+  .msg { font-size:13px; font-weight:700; margin-top:8px; min-height:18px; }
+  @media (max-width: 360px) {
+    .prem-item { padding: 8px; }
+    .field input { padding: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="app-shell" style="padding-bottom:24px;">
+  <div class="screen">
+    <h1>Painel Admin</h1>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="cadastro">Cadastrar</button>
+      <button class="tab-btn" data-tab="resgate">Resgatar</button>
+    </div>
+
+    <!-- Cadastro de prêmios -->
+    <div class="panel active" id="panel-cadastro">
+      <div class="field"><label>Foto (URL)</label><input id="p-foto" placeholder="https://..." /></div>
+      <div class="field"><label>Nome</label><input id="p-nome" placeholder="Nome do prêmio" /></div>
+      <div class="field"><label>Pontos necessários</label><input id="p-pontos" type="number" /></div>
+      <div class="field"><label>Estoque (quantidade)</label><input id="p-estoque" type="number" /></div>
+      <button class="btn btn-google" id="btn-salvar">Salvar prêmio</button>
+      <p class="msg" id="msg-cadastro"></p>
+      <div id="lista-premios" style="margin-top:24px;"></div>
+    </div>
+
+    <!-- Resgate manual -->
+    <div class="panel" id="panel-resgate">
+      <button class="btn btn-google" id="btn-scan">Escanear QR do aluno</button>
+      <div id="reader"></div>
+      <div id="resgate-user"></div>
+      <div id="lista-resgate"></div>
+      <p class="msg" id="msg-resgate"></p>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script>exigirLogin();</script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="js/game-fx.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
