@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
   <title>Perfil · Malba TechVerse</title>
   <link rel="manifest" href="manifest.json" />
+  <script>
+    /* Captura o evento de instalação o mais cedo possível: o Chrome pode
+       dispará-lo antes dos scripts com defer rodarem, e se não houver
+       ninguém escutando nesse instante o evento é perdido. */
+    window.__bipEvent = null;
+    window.addEventListener("beforeinstallprompt", function (e) {
+      e.preventDefault();
+      window.__bipEvent = e;
+      window.dispatchEvent(new Event("bip-ready"));
+    });
+  </script>
   <link rel="icon" type="image/png" href="img/favicon.png" />
   <meta name="theme-color" content="#241c5e" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
