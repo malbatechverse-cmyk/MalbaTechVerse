@@ -51,6 +51,10 @@
       <div class="field"><label>Nome</label><input id="p-nome" placeholder="Nome do prêmio" /></div>
       <div class="field"><label>Pontos necessários</label><input id="p-pontos" type="number" /></div>
       <div class="field"><label>Estoque (quantidade)</label><input id="p-estoque" type="number" /></div>
+      <div class="field" style="flex-direction:row;align-items:center;gap:8px;">
+        <input id="p-unico" type="checkbox" style="width:auto;" />
+        <label for="p-unico" style="margin:0;">Só pode ser resgatado 1x por pessoa</label>
+      </div>
       <button class="btn btn-google" id="btn-salvar">Salvar prêmio</button>
       <p class="msg" id="msg-cadastro"></p>
       <div id="lista-premios" style="margin-top:24px;"></div>
