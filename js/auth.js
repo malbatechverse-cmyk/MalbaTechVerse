@@ -42,6 +42,52 @@ document.getElementById("google-signin")?.addEventListener("click", async () => 
   }
 });
 
+document.getElementById("guest-signin")?.addEventListener("click", async () => {
+  try {
+    const result = await auth.signInAnonymously();
+    const user = result.user;
+
+    const userRef = db.collection("usuarios").doc(user.uid);
+    const snap = await userRef.get();
+
+    if (!snap.exists) {
+      await userRef.set({
+        nome: "Convidado",
+        convidado: true,
+        pontos: 0,
+        atividadesConcluidas: [],
+        premiosResgatados: [],
+        criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    mostrarAvisoConvidado();
+  } catch (err) {
+    console.error("Erro no login de convidado:", err);
+    alert("Não foi possível entrar como convidado. Tente novamente.");
+  }
+});
+
+function mostrarAvisoConvidado() {
+  const overlay = document.getElementById("convidado-overlay");
+  const countdown = document.getElementById("convidado-countdown");
+  if (!overlay) { window.location.href = "mapa.html"; return; }
+
+  overlay.classList.add("visible");
+  let restante = 5;
+  countdown.textContent = `Continuando em ${restante}s...`;
+
+  const intervalo = setInterval(() => {
+    restante -= 1;
+    if (restante > 0) {
+      countdown.textContent = `Continuando em ${restante}s...`;
+    } else {
+      clearInterval(intervalo);
+      window.location.href = "mapa.html";
+    }
+  }, 1000);
+}
+
 // Protege as páginas internas: se não estiver logado, manda pro login.
 function exigirLogin() {
   auth.onAuthStateChanged((user) => {
