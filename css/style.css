@@ -486,3 +486,84 @@ img { max-width: 100%; display: block; }
   font-weight: 600;
   padding: 6px;
 }
+
+/* ---------- Popup "Aviso modo convidado" ---------- */
+.convidado-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 8, 28, 0.75);
+  backdrop-filter: blur(3px);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.convidado-overlay.visible { opacity: 1; pointer-events: auto; }
+
+.convidado-modal {
+  width: 100%;
+  max-width: 380px;
+  background: linear-gradient(180deg, #3a1530, #2a0f24);
+  border: 1px solid rgba(255, 84, 112, 0.5);
+  border-radius: 24px;
+  padding: 26px 22px 22px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,84,112,0.15);
+  text-align: center;
+  transform: translateY(30px) scale(0.96);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(.2,.9,.3,1.2), opacity 0.3s ease;
+}
+.convidado-overlay.visible .convidado-modal { transform: translateY(0) scale(1); opacity: 1; }
+
+.convidado-modal .warn-icon {
+  font-size: 44px;
+  display: block;
+  margin: 0 auto 10px;
+  animation: convidado-pulse 0.9s ease-in-out infinite;
+}
+@keyframes convidado-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.convidado-modal h2 {
+  font-size: 22px;
+  color: #ff5470;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 14px;
+}
+
+.convidado-modal ul {
+  list-style: none;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 0;
+}
+.convidado-modal li {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-white);
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  line-height: 1.4;
+}
+.convidado-modal li::before {
+  content: "⚠️";
+  flex-shrink: 0;
+}
+
+.convidado-modal .countdown {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.55);
+}
