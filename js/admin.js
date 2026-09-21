@@ -24,8 +24,16 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
     document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
     btn.classList.add("active");
     document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+    sessionStorage.setItem("admin-tab", btn.dataset.tab);
   });
 });
+
+// depois de um reload (ex: pós-resgate), volta pra aba que estava ativa
+const abaSalva = sessionStorage.getItem("admin-tab");
+if (abaSalva) {
+  const btnAba = document.querySelector(`.tab-btn[data-tab="${abaSalva}"]`);
+  if (btnAba) btnAba.click();
+}
 
 // --- Cadastro ---
 document.getElementById("btn-salvar").addEventListener("click", async () => {
@@ -33,13 +41,15 @@ document.getElementById("btn-salvar").addEventListener("click", async () => {
   const foto = document.getElementById("p-foto").value.trim();
   const pontos = Number(document.getElementById("p-pontos").value);
   const estoque = Number(document.getElementById("p-estoque").value);
+  const unicoPorConta = document.getElementById("p-unico").checked;
   const msg = document.getElementById("msg-cadastro");
 
   if (!nome || !pontos || !estoque) { msg.textContent = "Preencha nome, pontos e estoque."; return; }
 
-  await db.collection("premios").add({ nome, foto, pontos, estoque });
+  await db.collection("premios").add({ nome, foto, pontos, estoque, unicoPorConta });
   msg.textContent = "Prêmio salvo!";
   ["p-nome","p-foto","p-pontos","p-estoque"].forEach((id) => document.getElementById(id).value = "");
+  document.getElementById("p-unico").checked = false;
   carregarPremios();
 });
 
@@ -52,7 +62,7 @@ async function carregarPremios() {
     const el = document.createElement("div");
     el.className = "prem-item";
     el.innerHTML = `<img src="${p.foto || 'img/malba.png'}" />
-      <div class="info">${p.nome}<br>${p.pontos} pts · estoque: ${p.estoque}</div>
+      <div class="info">${p.nome}<br>${p.pontos} pts · estoque: ${p.estoque}${p.unicoPorConta ? " · 1x por pessoa" : ""}</div>
       <button data-id="${doc.id}">Excluir</button>`;
     el.querySelector("button").addEventListener("click", async () => {
       await db.collection("premios").doc(doc.id).delete();
@@ -79,16 +89,20 @@ async function onScan(texto) {
   const u = doc.data() || {};
   document.getElementById("resgate-user").textContent = `${u.nome || "Aluno"} — ${u.pontos || 0} pontos`;
 
+  const jaResgatados = u.premiosResgatados || [];
+
   const premSnap = await db.collection("premios").get();
   const lista = document.getElementById("lista-resgate");
   lista.innerHTML = "";
   premSnap.forEach((pd) => {
     const p = pd.data();
+    const jaPegou = p.unicoPorConta && jaResgatados.includes(pd.id);
+    const bloqueado = (p.estoque || 0) <= 0 || jaPegou;
     const el = document.createElement("div");
     el.className = "prem-item";
     el.innerHTML = `<img src="${p.foto || 'img/malba.png'}" />
-      <div class="info">${p.nome}<br>${p.pontos} pts · estoque: ${p.estoque}</div>
-      <button ${p.estoque <= 0 ? "disabled" : ""} data-id="${pd.id}">Resgatar</button>`;
+      <div class="info">${p.nome}<br>${p.pontos} pts · estoque: ${p.estoque}${p.unicoPorConta ? " · 1x por pessoa" : ""}</div>
+      <button ${bloqueado ? "disabled" : ""} data-id="${pd.id}">${jaPegou ? "Já resgatou" : "Resgatar"}</button>`;
     el.querySelector("button").addEventListener("click", () => resgatar(pd.id));
     lista.appendChild(el);
   });
@@ -104,19 +118,26 @@ async function resgatar(premioId) {
       const uDoc = await t.get(userRef);
       const pDoc = await t.get(premioRef);
       const u = uDoc.data(), p = pDoc.data();
+      const jaResgatados = u.premiosResgatados || [];
+      if (p.unicoPorConta && jaResgatados.includes(premioId)) throw new Error("JA_RESGATADO");
       if ((u.pontos || 0) < p.pontos) throw new Error("SEM_PONTOS");
       if ((p.estoque || 0) <= 0) throw new Error("SEM_ESTOQUE");
-      t.update(userRef, { pontos: firebase.firestore.FieldValue.increment(-p.pontos) });
+      t.update(userRef, {
+        pontos: firebase.firestore.FieldValue.increment(-p.pontos),
+        premiosResgatados: firebase.firestore.FieldValue.arrayUnion(premioId)
+      });
       t.update(premioRef, { estoque: firebase.firestore.FieldValue.increment(-1) });
     });
     msg.style.color = "#8f8";
-    msg.textContent = "Resgate confirmado!";
+    msg.textContent = "Resgate confirmado! Recarregando...";
     if (typeof dispararConfete === "function") dispararConfete(30);
     if (typeof vibrarSucesso === "function") vibrarSucesso();
-    onScan("techverse-user:" + alunoUid); // atualiza tela
+    sessionStorage.setItem("admin-tab", "resgate");
+    setTimeout(() => location.reload(), 1500);
   } catch (err) {
     msg.style.color = "#f88";
-    msg.textContent = err.message === "SEM_PONTOS" ? "Aluno não tem pontos suficientes." :
+    msg.textContent = err.message === "JA_RESGATADO" ? "Esse aluno já resgatou esse prêmio." :
+                       err.message === "SEM_PONTOS" ? "Aluno não tem pontos suficientes." :
                        err.message === "SEM_ESTOQUE" ? "Prêmio esgotado." : "Erro ao resgatar.";
   }
 }
