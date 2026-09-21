@@ -23,9 +23,10 @@ auth.onAuthStateChanged(async (user) => {
 
   const doc = await db.collection("usuarios").doc(user.uid).get();
   const dados = doc.data() || {};
+  const convidado = user.isAnonymous;
 
   document.getElementById("nome-usuario").textContent = "Nome: " + (dados.nome || user.displayName || "");
-  animarContagem(document.getElementById("pontos-usuario"), dados.pontos || 0);
+  if (!convidado) animarContagem(document.getElementById("pontos-usuario"), dados.pontos || 0);
 
   const total = (typeof BARRACA_IDS !== "undefined" && BARRACA_IDS.length) || 25;
   const coletadas = (dados.barracasColetadas || []).length;
@@ -35,6 +36,9 @@ auth.onAuthStateChanged(async (user) => {
   if (dados.foto || user.photoURL) {
     document.getElementById("foto-usuario").src = dados.foto || user.photoURL;
   }
+
+  // Convidado não resgata prêmios: sem QR pessoal e sem lista de prêmios.
+  if (convidado) return;
 
   new QRious({
     element: document.getElementById("qrcode-canvas"),

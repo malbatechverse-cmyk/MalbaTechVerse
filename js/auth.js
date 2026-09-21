@@ -3,6 +3,7 @@
  * --------------------------------
  * Login com Google via Firebase Auth. Ao entrar pela 1ª vez, cria o
  * documento do usuário em /usuarios/{uid} no Firestore, com 0 pontos.
+ * Convidado (login anônimo) não tem pontos nem resgata prêmios.
  */
 
 const DOMINIO_ESCOLA = "@escola.pr.gov.br";
@@ -54,9 +55,7 @@ document.getElementById("guest-signin")?.addEventListener("click", async () => {
       await userRef.set({
         nome: "Convidado",
         convidado: true,
-        pontos: 0,
         atividadesConcluidas: [],
-        premiosResgatados: [],
         criadoEm: firebase.firestore.FieldValue.serverTimestamp()
       });
     }
@@ -87,6 +86,13 @@ function mostrarAvisoConvidado() {
     }
   }, 1000);
 }
+
+// Convidado (login anônimo) só registra as barracas visitadas: não ganha
+// pontos nem resgata prêmios. Marca o <body> pra esconder a parte de pontos
+// (elementos .so-cadastrado somem; .so-convidado aparecem).
+auth.onAuthStateChanged((user) => {
+  document.body.classList.toggle("is-convidado", !!user && user.isAnonymous);
+});
 
 // Protege as páginas internas: se não estiver logado, manda pro login.
 function exigirLogin() {

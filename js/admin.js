@@ -87,6 +87,11 @@ async function onScan(texto) {
 
   const doc = await db.collection("usuarios").doc(alunoUid).get();
   const u = doc.data() || {};
+  if (u.convidado) {
+    document.getElementById("resgate-user").textContent = "Convidado — não ganha pontos nem resgata prêmios.";
+    document.getElementById("lista-resgate").innerHTML = "";
+    return;
+  }
   document.getElementById("resgate-user").textContent = `${u.nome || "Aluno"} — ${u.pontos || 0} pontos`;
 
   const jaResgatados = u.premiosResgatados || [];
@@ -118,6 +123,7 @@ async function resgatar(premioId) {
       const uDoc = await t.get(userRef);
       const pDoc = await t.get(premioRef);
       const u = uDoc.data(), p = pDoc.data();
+      if (u.convidado) throw new Error("CONVIDADO");
       const jaResgatados = u.premiosResgatados || [];
       if (p.unicoPorConta && jaResgatados.includes(premioId)) throw new Error("JA_RESGATADO");
       if ((u.pontos || 0) < p.pontos) throw new Error("SEM_PONTOS");
@@ -136,7 +142,8 @@ async function resgatar(premioId) {
     setTimeout(() => location.reload(), 1500);
   } catch (err) {
     msg.style.color = "#f88";
-    msg.textContent = err.message === "JA_RESGATADO" ? "Esse aluno já resgatou esse prêmio." :
+    msg.textContent = err.message === "CONVIDADO" ? "Convidado não pode resgatar prêmios." :
+                       err.message === "JA_RESGATADO" ? "Esse aluno já resgatou esse prêmio." :
                        err.message === "SEM_PONTOS" ? "Aluno não tem pontos suficientes." :
                        err.message === "SEM_ESTOQUE" ? "Prêmio esgotado." : "Erro ao resgatar.";
   }

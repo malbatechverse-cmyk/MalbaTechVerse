@@ -2,6 +2,7 @@
  * Malba TechVerse — Scanner de barraca
  * Cada um dos 25 QR Codes fixos (js/barracas-config.js) vale 20 pontos,
  * uso único por usuário (controlado em usuarios/{uid}.barracasColetadas).
+ * Convidado (login anônimo) registra a barraca, mas NÃO ganha pontos.
  */
 
 // A lib desenha sozinha uma faixa cinza "Scanner paused" ao pausar a câmera
@@ -50,23 +51,35 @@ async function onScanSuccess(qrId) {
     return;
   }
 
+  const convidado = user.isAnonymous;
   const userRef = db.collection("usuarios").doc(user.uid);
   try {
     await db.runTransaction(async (t) => {
       const doc = await t.get(userRef);
       const coletadas = (doc.data() || {}).barracasColetadas || [];
       if (coletadas.includes(qrId)) throw new Error("JA_COLETADO");
-      t.update(userRef, {
-        pontos: firebase.firestore.FieldValue.increment(PONTOS_POR_BARRACA),
-        barracasColetadas: firebase.firestore.FieldValue.arrayUnion(qrId)
-      });
+      const atualizacao = { barracasColetadas: firebase.firestore.FieldValue.arrayUnion(qrId) };
+      if (!convidado) {
+        atualizacao.pontos = firebase.firestore.FieldValue.increment(PONTOS_POR_BARRACA);
+      }
+      t.update(userRef, atualizacao);
     });
-    mostrarResultado(`+${PONTOS_POR_BARRACA} pontos!`, true);
-    popupPontos(`+${PONTOS_POR_BARRACA}`);
+    if (convidado) {
+      mostrarResultado("Barraca registrada!", true);
+    } else {
+      mostrarResultado(`+${PONTOS_POR_BARRACA} pontos!`, true);
+      popupPontos(`+${PONTOS_POR_BARRACA}`);
+    }
     dispararConfete();
     vibrarSucesso();
   } catch (err) {
-    mostrarResultado(err.message === "JA_COLETADO" ? "Você já coletou pontos dessa barraca." : "Erro ao registrar pontos.", false);
+    const jaColetado = err.message === "JA_COLETADO";
+    mostrarResultado(
+      jaColetado
+        ? (convidado ? "Você já registrou essa barraca." : "Você já coletou pontos dessa barraca.")
+        : (convidado ? "Erro ao registrar a barraca." : "Erro ao registrar pontos."),
+      false
+    );
   }
 }
 
