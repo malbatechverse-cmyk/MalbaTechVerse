@@ -1,7 +1,7 @@
 // Malba TechVerse — Service Worker
 // Responsável por deixar o site "instalável" (PWA) e funcionar offline básico.
 
-const CACHE_NAME = "malba-techverse-v3";
+const CACHE_NAME = "malba-techverse-v4";
 const CORE_ASSETS = [
   "index.html",
   "mapa.html",
