@@ -131,11 +131,23 @@
           Sign in with Google
         </button>
 
-        <p class="footer-note">
-          Caso não tenha @escola entre com<br />
-          <a href="login-telefone.html">número de telefone</a>
-        </p>
+        <button id="guest-signin" class="btn-ghost" style="background:none; text-decoration:underline; text-underline-offset:3px;">
+          Entrar como convidado
+        </button>
       </main>
+    </div>
+  </div>
+
+  <div class="convidado-overlay" id="convidado-overlay">
+    <div class="convidado-modal">
+      <span class="warn-icon">⚠️</span>
+      <h2>Cuidado, convidado!</h2>
+      <ul>
+        <li>Você NÃO acumula seus pontos se sair ou trocar de aparelho — sem telefone, sem e-mail, sem volta.</li>
+        <li>Só dá pra resgatar 1 (UM) prêmio exclusivo — nada do catálogo normal.</li>
+        <li>Se limpar o navegador, sua conta some para sempre.</li>
+      </ul>
+      <p class="countdown" id="convidado-countdown">Continuando em 5s...</p>
     </div>
   </div>
 
